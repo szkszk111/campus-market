@@ -541,7 +541,7 @@
 // ==============================================
 // 在这里填入你自己的 SUPABASE 信息
 // ==============================================
-const SUPABASE_URL = "https://dwkcjoabpmauuvoaoqsw.supabase.co/rest/v1/";
+const SUPABASE_URL = "https://dwkcjoabpmauuvoaoqsw.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a2Nqb2FicG1hdXV2b2FvcXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDk5MzcsImV4cCI6MjA5NTcyNTkzN30.qnEmiWbANU1ccV1-fRcTkQevPrSfzHr_nwfqtf9Cy2Q";
 
 // 初始化 Supabase
