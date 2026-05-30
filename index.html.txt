@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>校园二手交易平台</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/@supabase/supabase-js/2.45.0/supabase-js.min.js"></script>
     <style>
         :root {
             --primary: #409eff;
@@ -39,7 +39,6 @@
             padding: 0 15px;
         }
 
-        /* 导航 */
         .nav {
             background: var(--card);
             box-shadow: var(--shadow);
@@ -66,7 +65,6 @@
             gap: 10px;
         }
 
-        /* 按钮 */
         .btn {
             padding: 8px 16px;
             border: none;
@@ -96,7 +94,6 @@
             transform: translateY(-1px);
         }
 
-        /* 页面 */
         .page {
             display: none;
             padding: 20px 0;
@@ -106,7 +103,6 @@
             display: block;
         }
 
-        /* 首页 */
         .search-bar {
             background: var(--card);
             padding: 15px;
@@ -187,7 +183,6 @@
             color: var(--text-secondary);
         }
 
-        /* 表单 */
         .form-box {
             max-width: 500px;
             margin: 0 auto;
@@ -230,7 +225,6 @@
             min-height: 80px;
         }
 
-        /* 模态框 */
         .modal {
             position: fixed;
             top: 0;
@@ -266,7 +260,6 @@
             color: var(--text-secondary);
         }
 
-        /* 详情页 */
         .detail-box {
             background: var(--card);
             padding: 20px;
@@ -286,7 +279,6 @@
             line-height: 1.8;
         }
 
-        /* 用户中心 */
         .user-tabs {
             display: flex;
             gap: 10px;
@@ -315,7 +307,6 @@
             display: block;
         }
 
-        /* 提示 */
         .toast {
             position: fixed;
             top: 70px;
@@ -343,14 +334,12 @@
             background: var(--danger);
         }
 
-        /* 空状态 */
         .empty {
             text-align: center;
             padding: 40px 0;
             color: var(--text-secondary);
         }
 
-        /* 响应式 */
         @media (max-width: 768px) {
             .product-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -363,7 +352,6 @@
 </head>
 <body>
 
-<!-- 导航 -->
 <div class="nav">
     <div class="container nav-content">
         <div class="nav-logo">校园二手交易平台</div>
@@ -377,9 +365,7 @@
     </div>
 </div>
 
-<!-- 页面容器 -->
 <div class="container">
-    <!-- 首页 -->
     <div id="page-home" class="page active">
         <div class="search-bar">
             <input type="text" class="search-input" id="searchInput" placeholder="搜索商品名称..." onkeyup="if(event.key==='Enter')App.loadProducts()">
@@ -397,13 +383,11 @@
         <div class="product-grid" id="productList"></div>
     </div>
 
-    <!-- 商品详情 -->
     <div id="page-detail" class="page">
         <div class="detail-box" id="detailContent"></div>
         <button class="btn btn-default" style="margin-top:15px;" onclick="App.navigate('home')">返回首页</button>
     </div>
 
-    <!-- 发布商品 -->
     <div id="page-publish" class="page">
         <div class="form-box">
             <h2 class="form-title">发布二手商品</h2>
@@ -441,7 +425,6 @@
         </div>
     </div>
 
-    <!-- 用户中心 -->
     <div id="page-user" class="page">
         <div class="form-box">
             <h2 class="form-title">个人中心</h2>
@@ -482,7 +465,6 @@
     </div>
 </div>
 
-<!-- 登录弹窗 -->
 <div id="loginModal" class="modal">
     <div class="modal-content">
         <span class="modal-close" onclick="App.closeModal('loginModal')">×</span>
@@ -502,7 +484,6 @@
     </div>
 </div>
 
-<!-- 注册弹窗 -->
 <div id="registerModal" class="modal">
     <div class="modal-content">
         <span class="modal-close" onclick="App.closeModal('registerModal')">×</span>
@@ -534,81 +515,64 @@
     </div>
 </div>
 
-<!-- 提示框 -->
 <div id="toast" class="toast"></div>
 
 <script>
-// ==============================================
-// 在这里填入你自己的 SUPABASE 信息
-// ==============================================
 const SUPABASE_URL = "https://dwkcjoabpmauuvoaoqsw.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a2Nqb2FicG1hdXV2b2FvcXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDk5MzcsImV4cCI6MjA5NTcyNTkzN30.qnEmiWbANU1ccV1-fRcTkQevPrSfzHr_nwfqtf9Cy2Q";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a2Nqb2FicG1hdXV2b2FvcXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDk5MzcsImV4cCI6MjA5NTcyNTkzN30.qnEmiWbANU1ccV1ccV1ccV1ccV1ccV1ccV1ccV1ccV1ccV1";
 
-// 初始化 Supabase
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// 数据库操作
 const DB = {
     async registerUser(user) {
         const { error } = await supabase.from("users").insert([user]);
         return !error;
     },
-
     async getUserByUsername(username) {
-        const { data } = await supabase.from("users").select("*").eq("username", username).single();
+        const { data } = await supabase.from("users").select("*").eq("username", username).maybeSingle();
         return data;
     },
-
     async updateUser(id, data) {
         const { error } = await supabase.from("users").update(data).eq("id", id);
         return !error;
     },
-
     async getProducts() {
         const { data } = await supabase.from("products").select("*").order("id", { ascending: false });
         return data || [];
     },
-
     async addProduct(product) {
         const { error } = await supabase.from("products").insert([product]);
         return !error;
     },
-
     async getProductById(id) {
-        const { data } = await supabase.from("products").select("*").eq("id", id).single();
+        const { data } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
         return data;
     },
-
     async updateProductStatus(id, status) {
         const { error } = await supabase.from("products").update({ status }).eq("id", id);
         return !error;
     },
-
     async addOrder(order) {
         const { error } = await supabase.from("orders").insert([order]);
         return !error;
     },
-
     async getOrders() {
         const { data } = await supabase.from("orders").select("*").order("id", { ascending: false });
         return data || [];
     }
 };
 
-// 全局应用
 const App = {
     currentUser: null,
-
     async init() {
         const user = localStorage.getItem("currentUser");
         if (user) {
-            this.currentUser = JSON.parse(user);
+            try { this.currentUser = JSON.parse(user); } catch (e) {}
         }
         this.updateNav();
         this.loadProducts();
         this.bindEvents();
     },
-
     updateNav() {
         const loginBtn = document.getElementById("loginBtn");
         const logoutBtn = document.getElementById("logoutBtn");
@@ -623,26 +587,14 @@ const App = {
             userBtn.style.display = "none";
         }
     },
-
     navigate(pageId) {
         document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
         document.getElementById(`page-${pageId}`).classList.add("active");
         if (pageId === "user") this.loadUserPage();
     },
-
-    showModal(modalId) {
-        document.getElementById(modalId).classList.add("active");
-    },
-
-    closeModal(modalId) {
-        document.getElementById(modalId).classList.remove("active");
-    },
-
-    switchModal(from, to) {
-        this.closeModal(from);
-        this.showModal(to);
-    },
-
+    showModal(modalId) { document.getElementById(modalId).classList.add("active"); },
+    closeModal(modalId) { document.getElementById(modalId).classList.remove("active"); },
+    switchModal(from, to) { this.closeModal(from); this.showModal(to); },
     async loadProducts() {
         const keyword = document.getElementById("searchInput").value.toLowerCase();
         const category = document.getElementById("categorySelect").value;
@@ -666,10 +618,9 @@ const App = {
             </div>
         `).join("");
     },
-
     async showDetail(id) {
         const p = await DB.getProductById(id);
-        if (!p) return this.showToast("商品不存在", "error");
+        if (!p) { this.showToast("商品不存在", "error"); return; }
         const seller = await DB.getUserByUsername(p.seller_id);
         const container = document.getElementById("detailContent");
         let btn = "";
@@ -695,7 +646,6 @@ const App = {
         `;
         this.navigate("detail");
     },
-
     goPublish() {
         if (!this.currentUser) {
             this.showToast("请先登录", "error");
@@ -704,7 +654,6 @@ const App = {
         }
         this.navigate("publish");
     },
-
     bindEvents() {
         document.getElementById("loginForm").addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -742,7 +691,7 @@ const App = {
 
         document.getElementById("publishForm").addEventListener("submit", async (e) => {
             e.preventDefault();
-            if (!this.currentUser) return this.showToast("请登录", "error");
+            if (!this.currentUser) { this.showToast("请登录", "error"); return; }
             const form = new FormData(e.target);
             const data = Object.fromEntries(form);
             data.seller_id = this.currentUser.username;
@@ -758,12 +707,11 @@ const App = {
             }
         });
     },
-
     async buyProduct(id) {
-        if (!this.currentUser) return this.showToast("请登录", "error");
+        if (!this.currentUser) { this.showToast("请登录", "error"); return; }
         const p = await DB.getProductById(id);
-        if (!p || p.status !== "onsale") return this.showToast("商品已售出", "error");
-        if (p.seller_id === this.currentUser.username) return this.showToast("不能购买自己的商品", "error");
+        if (!p || p.status !== "onsale") { this.showToast("商品已售出", "error"); return; }
+        if (p.seller_id === this.currentUser.username) { this.showToast("不能购买自己的商品", "error"); return; }
         await DB.updateProductStatus(id, "sold");
         await DB.addOrder({
             product_id: id,
@@ -774,7 +722,6 @@ const App = {
         this.showToast("购买成功！", "success");
         this.showDetail(id);
     },
-
     async loadUserPage() {
         if (!this.currentUser) return;
         document.getElementById("userUsername").value = this.currentUser.username;
@@ -784,14 +731,12 @@ const App = {
         this.loadUserProducts();
         this.loadOrders();
     },
-
     showUserTab(tab) {
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
         event.target.classList.add("active");
         document.getElementById(`tab-${tab}`).classList.add("active");
     },
-
     async updateUserInfo() {
         if (!this.currentUser) return;
         const data = {
@@ -808,7 +753,6 @@ const App = {
             this.showToast("保存失败", "error");
         }
     },
-
     async loadUserProducts() {
         if (!this.currentUser) return;
         const list = await DB.getProducts();
@@ -824,7 +768,6 @@ const App = {
             </div>
         `).join("");
     },
-
     async loadOrders() {
         if (!this.currentUser) return;
         const list = await DB.getOrders();
@@ -843,7 +786,6 @@ const App = {
             </div>
         `).join("");
     },
-
     logout() {
         this.currentUser = null;
         localStorage.removeItem("currentUser");
@@ -851,7 +793,6 @@ const App = {
         this.navigate("home");
         this.showToast("退出成功", "success");
     },
-
     showToast(msg, type = "default") {
         const toast = document.getElementById("toast");
         toast.textContent = msg;
@@ -860,7 +801,6 @@ const App = {
     }
 };
 
-// 启动
 App.init();
 </script>
 </body>
