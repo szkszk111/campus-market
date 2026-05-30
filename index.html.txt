@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>校园二手交易平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #409eff;
+            --success: #67c23a;
+            --warning: #e6a23c;
+            --danger: #f56c6c;
+            --text: #303133;
+            --text-secondary: #606266;
+            --border: #dcdfe6;
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --radius: 8px;
+            --shadow: 0 2px 12px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* 导航 */
+        .nav {
+            background: var(--card);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .nav-logo {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 按钮 */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-default {
+            background: #fff;
+            border: 1px solid var(--border);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* 页面 */
+        .page {
+            display: none;
+            padding: 20px 0;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* 首页 */
+        .search-bar {
+            background: var(--card);
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+
+        .category-select {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            outline: none;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: var(--card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 160px;
+            background: #eee;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-title {
+            font-size: 16px;
+            margin-bottom: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .product-price {
+            color: var(--danger);
+            font-size: 18px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .product-category {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* 表单 */
+        .form-box {
+            max-width: 500px;
+            margin: 0 auto;
+            background: var(--card);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* 模态框 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: var(--radius);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* 详情页 */
+        .detail-box {
+            background: var(--card);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .detail-price {
+            color: var(--danger);
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .detail-info {
+            margin: 15px 0;
+            line-height: 1.8;
+        }
+
+        /* 用户中心 */
+        .user-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* 提示 */
+        .toast {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: #333;
+            color: white;
+            border-radius: var(--radius);
+            font-size: 14px;
+            z-index: 2000;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .toast.success {
+            background: var(--success);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        /* 空状态 */
+        .empty {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-secondary);
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .product-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .nav-logo {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 导航 -->
+<div class="nav">
+    <div class="container nav-content">
+        <div class="nav-logo">校园二手交易平台</div>
+        <div class="nav-buttons">
+            <button class="btn btn-default" onclick="App.navigate('home')">首页</button>
+            <button class="btn btn-primary" id="publishBtn" onclick="App.goPublish()">发布商品</button>
+            <button class="btn btn-default" id="userBtn" onclick="App.navigate('user')">我的中心</button>
+            <button class="btn btn-default" id="loginBtn" onclick="App.showModal('loginModal')">登录</button>
+            <button class="btn btn-default" id="logoutBtn" onclick="App.logout()" style="display:none;">退出登录</button>
+        </div>
+    </div>
+</div>
+
+<!-- 页面容器 -->
+<div class="container">
+    <!-- 首页 -->
+    <div id="page-home" class="page active">
+        <div class="search-bar">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索商品名称..." onkeyup="if(event.key==='Enter')App.loadProducts()">
+            <select class="category-select" id="categorySelect" onchange="App.loadProducts()">
+                <option value="">全部分类</option>
+                <option value="手机数码">手机数码</option>
+                <option value="图书教材">图书教材</option>
+                <option value="交通工具">交通工具</option>
+                <option value="生活用品">生活用品</option>
+                <option value="服饰美妆">服饰美妆</option>
+                <option value="运动器材">运动器材</option>
+            </select>
+            <button class="btn btn-primary" onclick="App.loadProducts()">搜索</button>
+        </div>
+        <div class="product-grid" id="productList"></div>
+    </div>
+
+    <!-- 商品详情 -->
+    <div id="page-detail" class="page">
+        <div class="detail-box" id="detailContent"></div>
+        <button class="btn btn-default" style="margin-top:15px;" onclick="App.navigate('home')">返回首页</button>
+    </div>
+
+    <!-- 发布商品 -->
+    <div id="page-publish" class="page">
+        <div class="form-box">
+            <h2 class="form-title">发布二手商品</h2>
+            <form id="publishForm">
+                <div class="form-group">
+                    <label class="form-label">商品标题</label>
+                    <input type="text" class="form-input" name="title" required placeholder="请输入商品名称">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">商品分类</label>
+                    <select class="form-input" name="category" required>
+                        <option value="">请选择分类</option>
+                        <option value="手机数码">手机数码</option>
+                        <option value="图书教材">图书教材</option>
+                        <option value="交通工具">交通工具</option>
+                        <option value="生活用品">生活用品</option>
+                        <option value="服饰美妆">服饰美妆</option>
+                        <option value="运动器材">运动器材</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">出售价格（元）</label>
+                    <input type="number" step="0.01" class="form-input" name="price" required placeholder="请输入出售价格">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">原价（元）</label>
+                    <input type="number" step="0.01" class="form-input" name="original_price" placeholder="选填">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">商品描述</label>
+                    <textarea class="form-input" name="description" placeholder="详细描述商品成色、使用情况等"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success" style="width:100%;">立即发布</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 用户中心 -->
+    <div id="page-user" class="page">
+        <div class="form-box">
+            <h2 class="form-title">个人中心</h2>
+            <div class="user-tabs">
+                <button class="tab-btn active" onclick="App.showUserTab('info')">个人信息</button>
+                <button class="tab-btn" onclick="App.showUserTab('products')">我的商品</button>
+                <button class="tab-btn" onclick="App.showUserTab('orders')">我的订单</button>
+            </div>
+
+            <div id="tab-info" class="tab-content active">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-input" id="userUsername" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">昵称</label>
+                    <input type="text" class="form-input" id="userNickname">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">联系电话</label>
+                    <input type="text" class="form-input" id="userPhone">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">所在校区</label>
+                    <input type="text" class="form-input" id="userCampus">
+                </div>
+                <button class="btn btn-primary" onclick="App.updateUserInfo()">保存信息</button>
+            </div>
+
+            <div id="tab-products" class="tab-content">
+                <div id="userProductList"></div>
+            </div>
+
+            <div id="tab-orders" class="tab-content">
+                <div id="orderList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 登录弹窗 -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="App.closeModal('loginModal')">×</span>
+        <h2 class="form-title">用户登录</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">用户名</label>
+                <input type="text" class="form-input" name="username" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <input type="password" class="form-input" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">登录</button>
+            <p style="text-align:center; margin-top:10px;">没有账号？<a href="javascript:;" onclick="App.switchModal('loginModal','registerModal')">立即注册</a></p>
+        </form>
+    </div>
+</div>
+
+<!-- 注册弹窗 -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="modal-close" onclick="App.closeModal('registerModal')">×</span>
+        <h2 class="form-title">用户注册</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label class="form-label">用户名</label>
+                <input type="text" class="form-input" name="username" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <input type="password" class="form-input" name="password" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">昵称</label>
+                <input type="text" class="form-input" name="nickname" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">联系电话</label>
+                <input type="text" class="form-input" name="phone">
+            </div>
+            <div class="form-group">
+                <label class="form-label">所在校区</label>
+                <input type="text" class="form-input" name="campus">
+            </div>
+            <button type="submit" class="btn btn-success" style="width:100%;">注册</button>
+            <p style="text-align:center; margin-top:10px;">已有账号？<a href="javascript:;" onclick="App.switchModal('registerModal','loginModal')">立即登录</a></p>
+        </form>
+    </div>
+</div>
+
+<!-- 提示框 -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ==============================================
+// 在这里填入你自己的 SUPABASE 信息
+// ==============================================
+const SUPABASE_URL = "https://dwkcjoabpmauuvoaoqsw.supabase.co/rest/v1/";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR3a2Nqb2FicG1hdXV2b2FvcXN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDk5MzcsImV4cCI6MjA5NTcyNTkzN30.qnEmiWbANU1ccV1-fRcTkQevPrSfzHr_nwfqtf9Cy2Q";
+
+// 初始化 Supabase
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// 数据库操作
+const DB = {
+    async registerUser(user) {
+        const { error } = await supabase.from("users").insert([user]);
+        return !error;
+    },
+
+    async getUserByUsername(username) {
+        const { data } = await supabase.from("users").select("*").eq("username", username).single();
+        return data;
+    },
+
+    async updateUser(id, data) {
+        const { error } = await supabase.from("users").update(data).eq("id", id);
+        return !error;
+    },
+
+    async getProducts() {
+        const { data } = await supabase.from("products").select("*").order("id", { ascending: false });
+        return data || [];
+    },
+
+    async addProduct(product) {
+        const { error } = await supabase.from("products").insert([product]);
+        return !error;
+    },
+
+    async getProductById(id) {
+        const { data } = await supabase.from("products").select("*").eq("id", id).single();
+        return data;
+    },
+
+    async updateProductStatus(id, status) {
+        const { error } = await supabase.from("products").update({ status }).eq("id", id);
+        return !error;
+    },
+
+    async addOrder(order) {
+        const { error } = await supabase.from("orders").insert([order]);
+        return !error;
+    },
+
+    async getOrders() {
+        const { data } = await supabase.from("orders").select("*").order("id", { ascending: false });
+        return data || [];
+    }
+};
+
+// 全局应用
+const App = {
+    currentUser: null,
+
+    async init() {
+        const user = localStorage.getItem("currentUser");
+        if (user) {
+            this.currentUser = JSON.parse(user);
+        }
+        this.updateNav();
+        this.loadProducts();
+        this.bindEvents();
+    },
+
+    updateNav() {
+        const loginBtn = document.getElementById("loginBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const userBtn = document.getElementById("userBtn");
+        if (this.currentUser) {
+            loginBtn.style.display = "none";
+            logoutBtn.style.display = "inline-block";
+            userBtn.style.display = "inline-block";
+        } else {
+            loginBtn.style.display = "inline-block";
+            logoutBtn.style.display = "none";
+            userBtn.style.display = "none";
+        }
+    },
+
+    navigate(pageId) {
+        document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+        document.getElementById(`page-${pageId}`).classList.add("active");
+        if (pageId === "user") this.loadUserPage();
+    },
+
+    showModal(modalId) {
+        document.getElementById(modalId).classList.add("active");
+    },
+
+    closeModal(modalId) {
+        document.getElementById(modalId).classList.remove("active");
+    },
+
+    switchModal(from, to) {
+        this.closeModal(from);
+        this.showModal(to);
+    },
+
+    async loadProducts() {
+        const keyword = document.getElementById("searchInput").value.toLowerCase();
+        const category = document.getElementById("categorySelect").value;
+        const list = await DB.getProducts();
+        let filter = list;
+        if (keyword) filter = filter.filter(p => p.title.toLowerCase().includes(keyword));
+        if (category) filter = filter.filter(p => p.category === category);
+        const container = document.getElementById("productList");
+        if (filter.length === 0) {
+            container.innerHTML = `<div class="empty">暂无商品，快来发布吧！</div>`;
+            return;
+        }
+        container.innerHTML = filter.map(p => `
+            <div class="product-card" onclick="App.showDetail(${p.id})">
+                <div class="product-img"></div>
+                <div class="product-info">
+                    <div class="product-title">${p.title}</div>
+                    <div class="product-price">¥${p.price}</div>
+                    <div class="product-category">${p.category} | ${p.status === 'onsale' ? '在售' : '已售'}</div>
+                </div>
+            </div>
+        `).join("");
+    },
+
+    async showDetail(id) {
+        const p = await DB.getProductById(id);
+        if (!p) return this.showToast("商品不存在", "error");
+        const seller = await DB.getUserByUsername(p.seller_id);
+        const container = document.getElementById("detailContent");
+        let btn = "";
+        if (this.currentUser && this.currentUser.username === p.seller_id) {
+            btn = `<button class="btn btn-default" disabled>我发布的商品</button>`;
+        } else if (p.status === "onsale") {
+            btn = `<button class="btn btn-success" onclick="App.buyProduct(${p.id})">立即购买</button>`;
+        } else {
+            btn = `<button class="btn btn-default" disabled>已售出</button>`;
+        }
+        container.innerHTML = `
+            <h2>${p.title}</h2>
+            <div class="detail-price">¥${p.price}</div>
+            <div class="detail-info">
+                <p>分类：${p.category}</p>
+                <p>原价：¥${p.original_price || '无'}</p>
+                <p>卖家：${seller?.nickname || p.seller_id}</p>
+                <p>电话：${seller?.phone || '未填写'}</p>
+                <p>校区：${seller?.campus || '未填写'}</p>
+                <p>描述：${p.description || '无描述'}</p>
+            </div>
+            ${btn}
+        `;
+        this.navigate("detail");
+    },
+
+    goPublish() {
+        if (!this.currentUser) {
+            this.showToast("请先登录", "error");
+            this.showModal("loginModal");
+            return;
+        }
+        this.navigate("publish");
+    },
+
+    bindEvents() {
+        document.getElementById("loginForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const form = new FormData(e.target);
+            const data = Object.fromEntries(form);
+            const user = await DB.getUserByUsername(data.username);
+            if (!user || user.password !== data.password) {
+                this.showToast("账号或密码错误", "error");
+                return;
+            }
+            this.currentUser = user;
+            localStorage.setItem("currentUser", JSON.stringify(user));
+            this.updateNav();
+            this.closeModal("loginModal");
+            this.showToast("登录成功", "success");
+        });
+
+        document.getElementById("registerForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const form = new FormData(e.target);
+            const data = Object.fromEntries(form);
+            const exists = await DB.getUserByUsername(data.username);
+            if (exists) {
+                this.showToast("用户名已存在", "error");
+                return;
+            }
+            const ok = await DB.registerUser(data);
+            if (ok) {
+                this.showToast("注册成功，请登录", "success");
+                this.switchModal("registerModal", "loginModal");
+            } else {
+                this.showToast("注册失败", "error");
+            }
+        });
+
+        document.getElementById("publishForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            if (!this.currentUser) return this.showToast("请登录", "error");
+            const form = new FormData(e.target);
+            const data = Object.fromEntries(form);
+            data.seller_id = this.currentUser.username;
+            data.status = "onsale";
+            const ok = await DB.addProduct(data);
+            if (ok) {
+                this.showToast("发布成功", "success");
+                e.target.reset();
+                this.navigate("home");
+                this.loadProducts();
+            } else {
+                this.showToast("发布失败", "error");
+            }
+        });
+    },
+
+    async buyProduct(id) {
+        if (!this.currentUser) return this.showToast("请登录", "error");
+        const p = await DB.getProductById(id);
+        if (!p || p.status !== "onsale") return this.showToast("商品已售出", "error");
+        if (p.seller_id === this.currentUser.username) return this.showToast("不能购买自己的商品", "error");
+        await DB.updateProductStatus(id, "sold");
+        await DB.addOrder({
+            product_id: id,
+            buyer_id: this.currentUser.username,
+            seller_id: p.seller_id,
+            status: "done"
+        });
+        this.showToast("购买成功！", "success");
+        this.showDetail(id);
+    },
+
+    async loadUserPage() {
+        if (!this.currentUser) return;
+        document.getElementById("userUsername").value = this.currentUser.username;
+        document.getElementById("userNickname").value = this.currentUser.nickname || "";
+        document.getElementById("userPhone").value = this.currentUser.phone || "";
+        document.getElementById("userCampus").value = this.currentUser.campus || "";
+        this.loadUserProducts();
+        this.loadOrders();
+    },
+
+    showUserTab(tab) {
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+        event.target.classList.add("active");
+        document.getElementById(`tab-${tab}`).classList.add("active");
+    },
+
+    async updateUserInfo() {
+        if (!this.currentUser) return;
+        const data = {
+            nickname: document.getElementById("userNickname").value,
+            phone: document.getElementById("userPhone").value,
+            campus: document.getElementById("userCampus").value
+        };
+        const ok = await DB.updateUser(this.currentUser.id, data);
+        if (ok) {
+            this.currentUser = { ...this.currentUser, ...data };
+            localStorage.setItem("currentUser", JSON.stringify(this.currentUser));
+            this.showToast("保存成功", "success");
+        } else {
+            this.showToast("保存失败", "error");
+        }
+    },
+
+    async loadUserProducts() {
+        if (!this.currentUser) return;
+        const list = await DB.getProducts();
+        const mine = list.filter(p => p.seller_id === this.currentUser.username);
+        const container = document.getElementById("userProductList");
+        if (mine.length === 0) {
+            container.innerHTML = `<div class="empty">暂无发布商品</div>`;
+            return;
+        }
+        container.innerHTML = mine.map(p => `
+            <div style="padding:10px; border-bottom:1px solid #eee;">
+                <p>${p.title} - ¥${p.price} (${p.status === 'onsale' ? '在售' : '已售'})</p>
+            </div>
+        `).join("");
+    },
+
+    async loadOrders() {
+        if (!this.currentUser) return;
+        const list = await DB.getOrders();
+        const myOrders = list.filter(o =>
+            o.buyer_id === this.currentUser.username ||
+            o.seller_id === this.currentUser.username
+        );
+        const container = document.getElementById("orderList");
+        if (myOrders.length === 0) {
+            container.innerHTML = `<div class="empty">暂无订单</div>`;
+            return;
+        }
+        container.innerHTML = myOrders.map(o => `
+            <div style="padding:10px; border-bottom:1px solid #eee;">
+                <p>商品ID：${o.product_id} | ${o.buyer_id === this.currentUser.username ? '我购买的' : '我卖出的'}</p>
+            </div>
+        `).join("");
+    },
+
+    logout() {
+        this.currentUser = null;
+        localStorage.removeItem("currentUser");
+        this.updateNav();
+        this.navigate("home");
+        this.showToast("退出成功", "success");
+    },
+
+    showToast(msg, type = "default") {
+        const toast = document.getElementById("toast");
+        toast.textContent = msg;
+        toast.className = "toast show " + type;
+        setTimeout(() => toast.className = "toast", 2000);
+    }
+};
+
+// 启动
+App.init();
+</script>
+</body>
+</html>
